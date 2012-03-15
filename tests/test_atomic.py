@@ -7,7 +7,7 @@ class AtomicTest(TestCase):
     def test_init(self):
         atomic = Atomic()
         self.assertEqual(None, atomic.value)
-        
+
         atomic = Atomic(0)
         self.assertEqual(0, atomic.value)
 
@@ -31,14 +31,14 @@ class AtomicTest(TestCase):
     def test_update_no_retry(self):
         atomic = Atomic(1000)
         with atomic.update(retry=False) as updater:
-           updater.value += 1
+            updater.value += 1
         self.assertEqual(1001, atomic.value)
 
     def test_update_fail(self):
         atomic = Atomic(1000)
+
         def callable():
             with atomic.update(retry=False) as updater:
                 atomic.value = 1001
                 updater.value += 1
         self.assertRaises(ConcurrentUpdateError, callable)
-            
