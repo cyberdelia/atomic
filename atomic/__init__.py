@@ -1,5 +1,6 @@
 from __future__ import with_statement
 
+import multiprocessing
 import threading
 
 __all__ = ["Atomic", "ConcurrentUpdateError"]
@@ -7,6 +8,29 @@ __all__ = ["Atomic", "ConcurrentUpdateError"]
 
 class ConcurrentUpdateError(threading.ThreadError):
     pass
+
+
+class Lock(object):
+    def __init__(self, multiprocess=False):
+        self.multiprocess = multiprocess
+        if multiprocess:
+            self.lock = multiprocessing.RLock()
+        else:
+            self.lock = threading.RLock()
+
+    def __enter__(self):
+        self.acquire()
+
+    def __exit__(self, type, value, traceback):
+        self.release()
+
+    def acquire(self, block=True):
+        if self.multiprocess:
+            return self.lock.acquire(block=block)
+        return self.lock.acquire(blocking=block)
+
+    def release(self):
+        return self.lock.release()
 
 
 class AtomicUpdate(object):
@@ -31,8 +55,8 @@ class AtomicUpdate(object):
 
 
 class Atomic(object):
-    def __init__(self, value=None):
-        self.lock = threading.RLock()
+    def __init__(self, value=None, multiprocess=False):
+        self.lock = Lock(multiprocess=multiprocess)
         self._value = value
 
     def get_value(self):
@@ -64,7 +88,7 @@ class Atomic(object):
         return self.get_and_set(new_value)
 
     def compare_and_set(self, old_value, new_value):
-        if not self.lock.acquire(blocking=False):
+        if not self.lock.acquire(block=False):
             return False
         try:
             if self._value != old_value:
