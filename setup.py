@@ -4,7 +4,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='atomic',
-    version='0.1',
+    version='0.2',
     description='An atomic class that guarantees atomic updates to its contained value.',
     author='Timothée Peignier',
     author_email='timothee.peignier@tryphon.org',
