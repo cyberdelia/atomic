@@ -7,8 +7,8 @@ An atomic class that guarantees atomic updates to its contained value.
     >>> atomic.value = 40
     >>> atomic.value
     40
-    >>> with atomic.update() as updater:
-        updater.value += 1
+    >>> with atomic:
+        atomic.value += 1
     >>> atomic.value
     41
    

@@ -3,11 +3,7 @@ from __future__ import with_statement
 import multiprocessing
 import threading
 
-__all__ = ["Atomic", "ConcurrentUpdateError"]
-
-
-class ConcurrentUpdateError(threading.ThreadError):
-    pass
+__all__ = ["Atomic"]
 
 
 class Lock(object):
@@ -33,27 +29,6 @@ class Lock(object):
         return self.lock.release()
 
 
-class AtomicUpdate(object):
-    def __init__(self, atomic, value, retry=True):
-        self._atomic = atomic
-        self._old_value = value
-        self.value = value
-        self._retry = retry
-
-    def __enter__(self):
-        return self
-
-    def __exit__(self, type, value, traceback):
-        old_value = self._old_value
-        new_value = self.value
-        if not self._retry:
-            if not self._atomic.compare_and_set(old_value, new_value):
-                raise ConcurrentUpdateError("Update failed")
-        else:
-            while self._atomic.compare_and_set(old_value, new_value):
-                pass
-
-
 class Atomic(object):
     def __init__(self, value=None, multiprocess=False):
         self.lock = Lock(multiprocess=multiprocess)
@@ -67,8 +42,12 @@ class Atomic(object):
 
     value = property(get_value, set_value)
 
-    def update(self, retry=True):
-        return AtomicUpdate(self, self.get(), retry)
+    def __enter__(self):
+        with self.lock:
+            yield self
+
+    def __exit__(self, type, value, traceback):
+        pass
 
     def get(self):
         with self.lock:
