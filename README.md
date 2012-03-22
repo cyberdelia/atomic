@@ -11,8 +11,6 @@ An atomic class that guarantees atomic updates to its contained value.
         atomic.value += 1
     >>> atomic.value
     41
-   
-
 
 ## Installation
 
