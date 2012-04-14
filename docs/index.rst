@@ -1,20 +1,21 @@
-.. atomic documentation master file, created by
-   sphinx-quickstart on Thu Mar 22 11:39:06 2012.
-   You can adapt this file completely to your liking, but it should at least
-   contain the root `toctree` directive.
+Introduction
+============
 
-Welcome to atomic's documentation!
-==================================
+An atomic class that guarantees atomic updates to its contained value.
 
-Contents:
+You can report bugs and discuss features on the `issues page <https://github.com/cyberdelia/atomic/issues>`_.
+
+Table Of Contents
+=================
 
 .. toctree::
    :maxdepth: 2
 
+   installation
+   usage
+
 Indices and tables
 ==================
 
-* :ref:`genindex`
-* :ref:`modindex`
 * :ref:`search`
 
