@@ -24,6 +24,12 @@ class AtomicTest(TestCase):
 
     def test_update(self):
         atomic = Atomic(1000)
-        with atomic:
-            atomic.value += 1
+        value = atomic.update(lambda v: v + 1)
         self.assertEqual(1001, atomic.value)
+        self.assertEqual(1001, value)
+
+    def test_try_update(self):
+        atomic = Atomic(1000)
+        value = atomic.try_update(lambda v: v + 1)
+        self.assertEqual(1001, atomic.value)
+        self.assertEqual(1001, value)

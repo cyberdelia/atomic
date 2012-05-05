@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from setuptools import setup, find_packages
+from setuptools import setup, find_packages, Extension
 
 
 setup(
@@ -18,5 +18,8 @@ setup(
         'Operating System :: OS Independent',
         'Programming Language :: Python',
         'Topic :: Utilities',
+    ],
+    ext_modules=[
+        Extension("reference", ["atomic/reference.c"])
     ]
 )
