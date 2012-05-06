@@ -84,5 +84,5 @@ class Atomic(object):
         old_value = self.ref.get()
         new_value = update_func(old_value)
         while not self.ref.compare_and_set(old_value, new_value):
-            raise ConcurrentUpdateException("Update failed")
+            raise ConcurrentUpdateException("Updating reference failed")
         return new_value
