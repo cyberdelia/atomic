@@ -40,7 +40,7 @@ class AtomicTest(TestCase):
 
     def test_complex_update(self):
         def complex_update(v):
-            return map(lambda v: v + 1, v)
+            return [v + 1 for v in v]
         atomic = Atomic([-1, 0])
         value = atomic.update(complex_update)
         self.assertEqual([0, 1], atomic.value)

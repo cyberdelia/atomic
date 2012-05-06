@@ -6,7 +6,7 @@ typedef struct {
 	PyObject * value;
 } Reference;
 
-static int Reference_traverse(Reference *self, visitproc visit, void *arg) {
+static int Reference_traverse(Reference * self, visitproc visit, void *arg) {
 	int vret;
 	if (self->value) {
 		vret = visit(self->value, arg);
@@ -14,17 +14,17 @@ static int Reference_traverse(Reference *self, visitproc visit, void *arg) {
 			return vret;
 		}
 	}
-  return 0;
+	return 0;
 }
 
-static int Reference_clear(Reference *self) {
+static int Reference_clear(Reference * self) {
 	Py_CLEAR(self->value);
 	return 0;
 }
 
 static void Reference_dealloc(Reference * self) {
 	Py_XDECREF(self->value);
-	Py_TYPE(self)->tp_free((PyObject*)self);
+	Py_TYPE(self)->tp_free((PyObject *) self);
 }
 
 static PyObject * Reference_new(PyTypeObject * type, PyObject * args, PyObject * kwds) {
@@ -50,7 +50,8 @@ static PyObject * Reference_get(Reference * self) {
 	return self->value;
 }
 
-static PyObject * Reference_set(Reference * self, PyObject * args) {
+static PyObject * Reference_set(Reference * self, PyObject * args)
+{
 	PyObject *new_value, *old_value;
 	if (!PyArg_ParseTuple(args, "O", &new_value)) {
 		return NULL;
@@ -92,12 +93,12 @@ static PyObject * Reference_compare_and_set(Reference * self, PyObject * args) {
 		return Py_True;
 	}
 #else
- #error No CAS operation available for this platform
+#error No CAS operation available for this platform
 #endif
 	return Py_False;
 }
 
-static PyMethodDef Reference_methods[] = {
+static PyMethodDef reference_methods[] = {
 	{"get", (PyCFunction) Reference_get, METH_NOARGS, "Get value"},
 	{"set", (PyCFunction) Reference_set, METH_VARARGS, "Set value"},
 	{"get_and_set", (PyCFunction) Reference_get_and_set, METH_VARARGS, "Get and set value"},
@@ -106,12 +107,12 @@ static PyMethodDef Reference_methods[] = {
 };
 
 static PyTypeObject ReferenceType = {
-	PyObject_HEAD_INIT(NULL)
+	PyVarObject_HEAD_INIT(NULL, 0)
 	0,
 	"reference.Reference",
 	sizeof(Reference),
 	0,
-	(destructor)Reference_dealloc,
+	(destructor) Reference_dealloc,
 	0,
 	0,
 	0,
@@ -128,13 +129,13 @@ static PyTypeObject ReferenceType = {
 	0,
 	Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE | Py_TPFLAGS_HAVE_GC,
 	"Reference",
-	(traverseproc)Reference_traverse,
-	(inquiry)Reference_clear,
+	(traverseproc) Reference_traverse,
+	(inquiry) Reference_clear,
 	0,
 	0,
 	0,
 	0,
-	Reference_methods,
+	reference_methods,
 	0,
 	0,
 	0,
@@ -142,24 +143,34 @@ static PyTypeObject ReferenceType = {
 	0,
 	0,
 	0,
-	(initproc)Reference_init,
+	(initproc) Reference_init,
 	0,
 	Reference_new,
 };
 
-static PyMethodDef reference_methods[] = {
-	{NULL}
-};
-
-PyMODINIT_FUNC initreference(void) {
-	PyObject *m;
-
-	if (PyType_Ready(&ReferenceType) < 0) {
-		return;
+#if PY_MAJOR_VERSION >= 3
+	static struct PyModuleDef reference_module = {
+		PyModuleDef_HEAD_INIT,
+		"reference",
+		"Reference module.",
+		-1,
+		NULL, NULL, NULL, NULL, NULL
+	};
+	#define INITERROR return NULL
+ 	PyObject * PyInit_reference(void) {
+#else
+ 	#define INITERROR return
+	void initreference(void) {
+#endif
+#if PY_MAJOR_VERSION >= 3
+	PyObject *module = PyModule_Create(&reference_module);
+#else
+	PyObject *module = Py_InitModule("reference", reference_methods);
+#endif
+	if (module == NULL) {
+		INITERROR;
 	}
-	
-	m = PyModule_Create("reference", reference_methods, "reference module");
-
-	Py_INCREF(&ReferenceType);
-	PyModule_AddObject(m, "Reference", (PyObject *) & ReferenceType);
+#if PY_MAJOR_VERSION >= 3
+	return module;
+#endif
 }
