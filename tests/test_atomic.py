@@ -33,3 +33,15 @@ class AtomicTest(TestCase):
         value = atomic.try_update(lambda v: v + 1)
         self.assertEqual(1001, atomic.value)
         self.assertEqual(1001, value)
+
+    def test_complex_value(self):
+        atomic = Atomic([-1, 0])
+        self.assertEqual([-1, 0], atomic.value)
+
+    def test_complex_update(self):
+        def complex_update(v):
+            return map(lambda v: v + 1, v)
+        atomic = Atomic([-1, 0])
+        value = atomic.update(complex_update)
+        self.assertEqual([0, 1], atomic.value)
+        self.assertEqual([0, 1], value)
