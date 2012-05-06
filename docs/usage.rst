@@ -4,4 +4,5 @@
 Usage
 =====
 
-How to use atomic once installed.
+.. automodule:: atomic
+    :members:
