@@ -10,7 +10,7 @@ with open('LICENSE') as f:
 
 setup(
     name='atomic',
-    version='0.3.2',
+    version='0.3.3',
     description='An atomic class that guarantees atomic updates to its contained value.',
     long_description=readme,
     author='Timothée Peignier',
