@@ -35,14 +35,12 @@ static PyObject * Reference_new(PyTypeObject * type, PyObject * args, PyObject *
 }
 
 static int Reference_init(Reference * self, PyObject * args, PyObject * kwds) {
-	PyObject *value, *previous;
+	PyObject *value;
 	if (!PyArg_ParseTuple(args, "O", &value)) {
 		return -1;
 	}
-	previous = self->value;
-	Py_INCREF(value);
 	self->value = value;
-	Py_XDECREF(previous);
+	Py_INCREF(self->value);
 	return 0;
 }
 
@@ -53,14 +51,13 @@ static PyObject * Reference_get(Reference * self) {
 
 static PyObject * Reference_set(Reference * self, PyObject * args)
 {
-	PyObject *new_value, *old_value;
+	PyObject *new_value;
 	if (!PyArg_ParseTuple(args, "O", &new_value)) {
 		return NULL;
 	}
-	old_value = self->value;
-	Py_INCREF(new_value);
 	self->value = new_value;
-	Py_XDECREF(old_value);
+	Py_INCREF(self->value);
+	Py_INCREF(Py_None);
 	return Py_None;
 }
 
@@ -70,9 +67,9 @@ static PyObject * Reference_get_and_set(Reference * self, PyObject * args) {
 		return NULL;
 	}
 	old_value = self->value;
-	Py_INCREF(new_value);
 	self->value = new_value;
-	Py_XDECREF(old_value);
+	Py_INCREF(self->value);
+	Py_INCREF(old_value);
 	return old_value;
 }
 
@@ -83,19 +80,23 @@ static PyObject * Reference_compare_and_set(Reference * self, PyObject * args) {
 	}
 #if __ENVIRONMENT_MAC_OS_X_VERSION_MIN_REQUIRED__ >= 1050
 	if (OSAtomicCompareAndSwap64(expect_value, new_value, &self->value)) {
+		Py_INCREF(Py_True);
 		return Py_True;
 	}
 #elif defined(_MSC_VER)
 	if (InterlockedCompareExchange(&self->value, new_value, old_value)) {
+		Py_INCREF(Py_True);
 		return Py_True;
 	}
 #elif (__GNUC__ * 10000 + __GNUC_MINOR__ * 100 + __GNUC_PATCHLEVEL__) > 40100
 	if (__sync_bool_compare_and_swap(&self->value, expect_value, new_value)) {
+		Py_INCREF(Py_True);
 		return Py_True;
 	}
 #else
 #error No CAS operation available for this platform
 #endif
+	Py_INCREF(Py_False);
 	return Py_False;
 }
 
