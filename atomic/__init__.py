@@ -4,8 +4,11 @@ __all__ = ["Atomic", "ConcurrentUpdateException"]
 
 
 try:
-    from reference import Reference
-except ImportError:
+    try:
+        from com.lapanthere.atomic import Reference
+    except ImportError:
+        from atomic._reference import Reference  # noqa
+except ImportError as e:
     class Reference(object):  # noqa
         def __init__(self, value=None):
             self.lock = threading.RLock()

@@ -1,35 +1,36 @@
-#include <Python.h>
+#include <python.h>
 #include "structmember.h"
 
-typedef struct {
+typedef struct Reference {
 	PyObject_HEAD
 	PyObject * value;
 } Reference;
 
 static int Reference_traverse(Reference * self, visitproc visit, void *arg) {
-	int vret;
-	if (self->value) {
-		vret = visit(self->value, arg);
-		if (vret != 0) {
-			return vret;
-		}
-	}
+	Reference *s;
+	s = (Reference *)self;
+	Py_VISIT(s->value);
 	return 0;
 }
 
 static int Reference_clear(Reference * self) {
-	Py_CLEAR(self->value);
+	Reference *s;
+	s = (Reference *)self;
+	Py_CLEAR(s->value);
 	return 0;
 }
 
 static void Reference_dealloc(Reference * self) {
-	Py_XDECREF(self->value);
+	Reference_clear(self);
 	Py_TYPE(self)->tp_free((PyObject *) self);
 }
 
 static PyObject * Reference_new(PyTypeObject * type, PyObject * args, PyObject * kwds) {
 	Reference *self;
 	self = (Reference *) type->tp_alloc(type, 0);
+	if (self != NULL) {
+			self->value = NULL;
+	}
 	return (PyObject *) self;
 }
 
@@ -98,6 +99,12 @@ static PyObject * Reference_compare_and_set(Reference * self, PyObject * args) {
 	return Py_False;
 }
 
+static PyMemberDef reference_members[] = {
+		{"value", T_OBJECT, offsetof(Reference, value), READONLY, "value"},
+		{NULL}
+};
+
+
 static PyMethodDef reference_methods[] = {
 	{"get", (PyCFunction) Reference_get, METH_NOARGS, "Get value"},
 	{"set", (PyCFunction) Reference_set, METH_VARARGS, "Set value"},
@@ -106,13 +113,17 @@ static PyMethodDef reference_methods[] = {
 	{NULL}
 };
 
+#ifndef PyVarObject_HEAD_INIT
+		#define PyVarObject_HEAD_INIT(type, size) \
+				PyObject_HEAD_INIT(type) size,
+#endif
+
 static PyTypeObject ReferenceType = {
 	PyVarObject_HEAD_INIT(NULL, 0)
-	0,
-	"reference.Reference",
+	"atomic._reference.Reference",
 	sizeof(Reference),
 	0,
-	(destructor) Reference_dealloc,
+	Reference_dealloc,
 	0,
 	0,
 	0,
@@ -120,23 +131,23 @@ static PyTypeObject ReferenceType = {
 	0,
 	0,
 	0,
+	0,	
 	0,
 	0,
 	0,
 	0,
 	0,
 	0,
-	0,
-	Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE | Py_TPFLAGS_HAVE_GC,
-	"Reference",
-	(traverseproc) Reference_traverse,
-	(inquiry) Reference_clear,
+	Py_TPFLAGS_DEFAULT | Py_TPFLAGS_HAVE_GC,
+	"Atomic reference object",
+	Reference_traverse,
+	Reference_clear,
 	0,
 	0,
 	0,
 	0,
 	reference_methods,
-	0,
+	reference_members,
 	0,
 	0,
 	0,
@@ -146,31 +157,40 @@ static PyTypeObject ReferenceType = {
 	(initproc) Reference_init,
 	0,
 	Reference_new,
+	0,
 };
 
 #if PY_MAJOR_VERSION >= 3
-	static struct PyModuleDef reference_module = {
-		PyModuleDef_HEAD_INIT,
-		"reference",
-		"Reference module.",
-		-1,
-		NULL, NULL, NULL, NULL, NULL
-	};
-	#define INITERROR return NULL
- 	PyObject * PyInit_reference(void) {
+	#define MOD_ERROR_VAL NULL
+	#define MOD_SUCCESS_VAL(val) val
+	#define MOD_INIT(name) PyMODINIT_FUNC PyInit__##name(void)
+	#define MOD_DEF(ob, name, doc) \
+		static struct PyModuleDef moduledef = { \
+			PyModuleDef_HEAD_INIT, name, doc, -1}; \
+		ob = PyModule_Create(&moduledef);
 #else
- 	#define INITERROR return
-	void initreference(void) {
+	#define MOD_ERROR_VAL
+	#define MOD_SUCCESS_VAL(val)
+	#define MOD_INIT(name) void init_##name(void)
+	#define MOD_DEF(ob, name, doc) \
+		ob = Py_InitModule3(name, NULL, doc);
 #endif
-#if PY_MAJOR_VERSION >= 3
-	PyObject *module = PyModule_Create(&reference_module);
-#else
-	PyObject *module = Py_InitModule("reference", reference_methods);
-#endif
-	if (module == NULL) {
-		INITERROR;
+
+MOD_INIT(reference) {
+	PyObject *m;
+	
+	MOD_DEF(m, "_reference", "Atomic reference module");
+	if (m == NULL) {
+		return MOD_ERROR_VAL;
 	}
-#if PY_MAJOR_VERSION >= 3
-	return module;
-#endif
+	
+	ReferenceType.tp_new = PyType_GenericNew;	
+	if (PyType_Ready(&ReferenceType) < 0) {
+		return MOD_ERROR_VAL;
+	}
+	
+	Py_INCREF(&ReferenceType);
+	PyModule_AddObject(m, "Reference", (PyObject *)&ReferenceType);
+	
+	return MOD_SUCCESS_VAL(m);
 }

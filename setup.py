@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+import sys
+
 from setuptools import setup, find_packages, Extension
 
 
@@ -7,6 +9,12 @@ with open('README.rst') as f:
 
 with open('LICENSE') as f:
     license = f.read()
+
+kwargs = {}
+if "java" not in sys.version.lower():
+    kwargs = dict(ext_modules=[
+        Extension("atomic._reference", ["atomic/_reference.c"])
+    ])
 
 setup(
     name='atomic',
@@ -27,7 +35,5 @@ setup(
         'Programming Language :: Python',
         'Topic :: Utilities',
     ],
-    ext_modules=[
-        Extension("reference", ["atomic/reference.c"])
-    ]
+    **kwargs
 )
