@@ -17,3 +17,5 @@ coverage/
 __pycache__
 *.so
 *$py.class
+.vagrant
+Vagrantfile

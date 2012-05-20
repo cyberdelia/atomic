@@ -78,6 +78,9 @@ static PyObject * Reference_compare_and_set(Reference * self, PyObject * args) {
 	if (!PyArg_ParseTuple(args, "OO", &expect_value, &new_value)) {
 		return NULL;
 	}
+	Py_INCREF(self->value);
+	Py_INCREF(expect_value);
+	Py_INCREF(new_value);
 #if __ENVIRONMENT_MAC_OS_X_VERSION_MIN_REQUIRED__ >= 1050
 	if (OSAtomicCompareAndSwap64(expect_value, new_value, &self->value)) {
 		Py_INCREF(Py_True);
