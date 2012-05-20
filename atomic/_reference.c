@@ -1,4 +1,4 @@
-#include <python.h>
+#include <Python.h>
 #include "structmember.h"
 
 typedef struct Reference {
