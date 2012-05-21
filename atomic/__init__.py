@@ -69,7 +69,7 @@ class Atomic(object):
     def set_value(self, value):
         return self.ref.set(value)
 
-    value = property(get_value, set_value, doc="""Get and set current value""")
+    value = property(get_value, set_value, doc="""Get or set current value""")
 
     def get_and_set(self, new_value):
         """Atomically sets to the given value and returns the old value
