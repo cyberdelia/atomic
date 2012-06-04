@@ -8,7 +8,7 @@ try:
         from com.lapanthere.atomic import Reference
     except ImportError:
         from atomic._reference import Reference  # noqa
-except ImportError as e:
+except ImportError:
     class Reference(object):  # noqa
         def __init__(self, value=None):
             self.lock = threading.RLock()
