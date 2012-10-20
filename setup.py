@@ -18,7 +18,7 @@ if "java" not in sys.version.lower():
 
 setup(
     name='atomic',
-    version='0.4',
+    version='0.5',
     description='An atomic class that guarantees atomic updates to its contained value.',
     long_description=readme,
     author='Timothée Peignier',
