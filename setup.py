@@ -11,10 +11,12 @@ with open('LICENSE') as f:
     license = f.read()
 
 kwargs = {}
-if "java" not in sys.version.lower():
+version = sys.version.lower()
+if "java" not in version and "pypy" not in version:
     kwargs = dict(ext_modules=[
         Extension("atomic._reference", ["atomic/_reference.c"])
     ])
+
 
 setup(
     name='atomic',
