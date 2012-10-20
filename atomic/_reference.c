@@ -1,6 +1,10 @@
 #include <Python.h>
 #include "structmember.h"
 
+#if __ENVIRONMENT_MAC_OS_X_VERSION_MIN_REQUIRED__ >= 1050
+#include <libkern/OSAtomic.h>
+#endif
+
 typedef struct Reference {
 	PyObject_HEAD
 	PyObject * value;
@@ -82,7 +86,7 @@ static PyObject * Reference_compare_and_set(Reference * self, PyObject * args) {
 	Py_INCREF(expect_value);
 	Py_INCREF(new_value);
 #if __ENVIRONMENT_MAC_OS_X_VERSION_MIN_REQUIRED__ >= 1050
-	if (OSAtomicCompareAndSwap64(expect_value, new_value, &self->value)) {
+	if (OSAtomicCompareAndSwap64Barrier(expect_value, new_value, &self->value)) {
 		Py_INCREF(Py_True);
 		return Py_True;
 	}
@@ -127,7 +131,7 @@ static PyTypeObject ReferenceType = {
 	"atomic._reference.Reference",
 	sizeof(Reference),
 	0,
-	Reference_dealloc,
+	(destructor)Reference_dealloc,
 	0,
 	0,
 	0,
@@ -135,7 +139,7 @@ static PyTypeObject ReferenceType = {
 	0,
 	0,
 	0,
-	0,	
+	0,
 	0,
 	0,
 	0,
@@ -144,8 +148,8 @@ static PyTypeObject ReferenceType = {
 	0,
 	Py_TPFLAGS_DEFAULT | Py_TPFLAGS_HAVE_GC,
 	"Atomic reference object",
-	Reference_traverse,
-	Reference_clear,
+	(traverseproc)Reference_traverse,
+	(inquiry)Reference_clear,
 	0,
 	0,
 	0,
@@ -182,19 +186,19 @@ static PyTypeObject ReferenceType = {
 
 MOD_INIT(reference) {
 	PyObject *m;
-	
+
 	MOD_DEF(m, "_reference", "Atomic reference module");
 	if (m == NULL) {
 		return MOD_ERROR_VAL;
 	}
-	
-	ReferenceType.tp_new = PyType_GenericNew;	
+
+	ReferenceType.tp_new = PyType_GenericNew;
 	if (PyType_Ready(&ReferenceType) < 0) {
 		return MOD_ERROR_VAL;
 	}
-	
+
 	Py_INCREF(&ReferenceType);
 	PyModule_AddObject(m, "Reference", (PyObject *)&ReferenceType);
-	
+
 	return MOD_SUCCESS_VAL(m);
 }
