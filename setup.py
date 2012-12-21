@@ -7,9 +7,6 @@ from setuptools import setup, find_packages, Extension
 with open('README.rst') as f:
     readme = f.read()
 
-with open('LICENSE') as f:
-    license = f.read()
-
 kwargs = {}
 version = sys.version.lower()
 if "java" not in version and "pypy" not in version:
@@ -26,7 +23,7 @@ setup(
     author='Timothée Peignier',
     author_email='timothee.peignier@tryphon.org',
     url='https://github.com/cyberdelia/atomic',
-    license=license,
+    license='MIT',
     packages=find_packages(),
     zip_safe=False,
     include_package_data=True,
