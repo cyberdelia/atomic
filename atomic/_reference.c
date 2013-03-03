@@ -86,7 +86,8 @@ static PyObject * Reference_compare_and_set(Reference * self, PyObject * args) {
 	Py_INCREF(expect_value);
 	Py_INCREF(new_value);
 #if __ENVIRONMENT_MAC_OS_X_VERSION_MIN_REQUIRED__ >= 1050
-	if (OSAtomicCompareAndSwapPtrBarrier(expect_value, new_value, (void *volatile)self->value)) {
+	if (OSAtomicCompareAndSwapPtrBarrier(expect_value, new_value,
+				(void * volatile)&self->value)) {
 		Py_INCREF(Py_True);
 		return Py_True;
 	}
