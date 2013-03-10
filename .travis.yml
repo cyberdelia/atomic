@@ -1,5 +1,7 @@
 language: python
 python:
-  - 2.7
-install: pip install tox --use-mirrors
-script: tox -e py26,py27,py33,pypy
+  - "2.6"
+  - "2.7"
+  - "3.3"
+  - "pypy"
+script: python setup.py test
