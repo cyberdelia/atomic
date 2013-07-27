@@ -5,6 +5,10 @@
 #include <libkern/OSAtomic.h>
 #endif
 
+#if defined(_MSC_VER)
+#include <Windows.h>
+#endif
+
 typedef struct Reference {
 	PyObject_HEAD
 	PyObject * value;
@@ -92,7 +96,7 @@ static PyObject * Reference_compare_and_set(Reference * self, PyObject * args) {
 		return Py_True;
 	}
 #elif defined(_MSC_VER)
-	if (InterlockedCompareExchange(&self->value, new_value, old_value)) {
+	if (_InterlockedCompareExchange(&self->value, new_value, expect_value)) {
 		Py_INCREF(Py_True);
 		return Py_True;
 	}
