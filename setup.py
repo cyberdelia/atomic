@@ -1,19 +1,17 @@
 # -*- coding: utf-8 -*-
-import sys
+import io
 
-from setuptools import setup, find_packages, Extension
+from setuptools import setup, find_packages
 
+try:
+    from atomic import ffi
+except ImportError:
+    ext_modules=[]
+else:
+    ext_modules=[ffi.verifier.get_extension()]
 
-with open('README.rst') as f:
+with io.open('README.rst', encoding='utf-8') as f:
     readme = f.read()
-
-kwargs = {}
-version = sys.version.lower()
-if "java" not in version and "pypy" not in version:
-    kwargs = dict(ext_modules=[
-        Extension("atomic._reference", ["atomic/_reference.c"])
-    ])
-
 
 setup(
     name='atomic',
@@ -35,6 +33,8 @@ setup(
         'Programming Language :: Python :: 3',
         'Topic :: Utilities',
     ],
+    setup_requires=['cffi'],
+    install_requires=['cffi'],
     test_suite="tests",
-    **kwargs
+    ext_modules=ext_modules,
 )
