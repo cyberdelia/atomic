@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 import io
+import os
 
+from setuptools.dist import Distribution
 from setuptools import setup, find_packages
 
 try:
@@ -9,6 +11,10 @@ except ImportError:
     ext_modules=[]
 else:
     ext_modules=[ffi.verifier.get_extension()]
+
+class BinaryDistribution(Distribution):
+    def is_pure(self):
+        return False
 
 with io.open('README.rst', encoding='utf-8') as f:
     readme = f.read()
@@ -37,4 +43,5 @@ setup(
     install_requires=['cffi'],
     test_suite="tests",
     ext_modules=ext_modules,
+    distclass=BinaryDistribution,
 )
