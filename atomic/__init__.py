@@ -97,6 +97,10 @@ class AtomicLongArray(object):
         """
         self._array = [AtomicLong(x) for x in array]
 
+    def __repr__(self):
+        return '<{0} at 0x{1:x}: {2!r}>'.format(
+            self.__class__.__name__, id(self), self.value)
+
     def __len__(self):
         return len(self._array)
 
@@ -104,10 +108,7 @@ class AtomicLongArray(object):
         return self._array[key].value
 
     def __setitem__(self, key, value):
-        if self._array[key]:
-            self._array[key].value = value
-        else:
-            self._array[key] = AtomicLong(value)
+        self._array[key].value = value
 
     def __iter__(self):
         for a in self._array:
