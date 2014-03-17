@@ -4,9 +4,10 @@ Atomic
 
 An atomic class that guarantees atomic updates to its contained value. ::
 
-    from atomic import Atomic
-    atomic = Atomic(0)
-    atomic.update(lambda v: v + 1)
+    from atomic import AtomicLong
+    atomic = AtomicLong(0)
+    atomic += 1
+    atomic.value
 
 
 Installation
