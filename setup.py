@@ -21,7 +21,7 @@ with io.open('README.rst', encoding='utf-8') as f:
 
 setup(
     name='atomic',
-    version='0.7.1',
+    version='0.7.2',
     description='An atomic class that guarantees atomic updates to its contained value.',
     long_description=readme,
     author='Timothée Peignier',
