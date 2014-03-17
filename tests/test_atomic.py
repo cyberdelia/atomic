@@ -68,6 +68,16 @@ class AtomicLongArrayTest(unittest.TestCase):
         atomic[1] = -2
         self.assertEqual(atomic[1], -2)
 
+    def test_set_obj(self):
+        atomic = AtomicLongArray([-1, 0])
+        atomic[1] = AtomicLong(-2)
+        self.assertEqual(atomic[1], -2)
+
+    def test_increment(self):
+        atomic = AtomicLongArray([-1, 0])
+        atomic[1] += 1
+        self.assertEqual(atomic[1], 1)
+
     def test_iter(self):
         atomic = AtomicLongArray([-1, 0])
         for i, a in enumerate(atomic):

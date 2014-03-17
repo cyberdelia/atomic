@@ -1,4 +1,7 @@
+from functools import total_ordering
+
 from cffi import FFI
+
 
 ffi = FFI()
 
@@ -29,6 +32,7 @@ long long_compare_and_set(long *v, long *e, long n) {
 """)
 
 
+@total_ordering
 class AtomicLong(object):
     """
     An atomic class that guarantees atomic updates to its contained integer value.
@@ -84,6 +88,25 @@ class AtomicLong(object):
     def compare_and_swap(self, expect_value, new_value):
         return self.compare_and_set(expect_value, new_value)
 
+    def __eq__(self, a):
+        if self is a:
+            return True
+        elif isinstance(a, AtomicLong):
+            return self.value == a.value
+        else:
+            return self.value == a
+
+    def __ne__(self, a):
+        return not (self == a)
+
+    def __lt__(self, a):
+        if self is a:
+            return False
+        elif isinstance(a, AtomicLong):
+            return self.value < a.value
+        else:
+            return self.value < a
+
 
 class AtomicLongArray(object):
     """
@@ -105,10 +128,13 @@ class AtomicLongArray(object):
         return len(self._array)
 
     def __getitem__(self, key):
-        return self._array[key].value
+        return self._array[key]
 
     def __setitem__(self, key, value):
-        self._array[key].value = value
+        if isinstance(value, AtomicLong):
+            self._array[key] = value
+        else:
+            self._array[key].value = value
 
     def __iter__(self):
         for a in self._array:
